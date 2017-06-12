@@ -3,9 +3,12 @@ package dominando.android.intents;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.AlarmClock;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.jar.Manifest;
 
 public class MainActivity extends ListActivity {
 
@@ -35,9 +39,15 @@ public class MainActivity extends ListActivity {
 
 //            Realizar uma chamada
             case 1:
-                uri = Uri.parse("tel:988273299");
-                intent = new Intent(Intent.ACTION_DIAL, uri);
-                dispararIntent(intent);
+                if(ActivityCompat.checkSelfPermission(this,
+                        android.Manifest.permission.CALL_PHONE)!=PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(this,new String[]{android.Manifest.permission.CALL_PHONE},0);
+                }else{
+                    discar();
+                }
+//                uri = Uri.parse("tel:988273299");
+//                intent = new Intent(Intent.ACTION_DIAL, uri);
+//                dispararIntent(intent);
                 break;
 
 //            Pesquisar uma posição no mapa. O aparelho deve ter google maps.
@@ -130,7 +140,19 @@ public class MainActivity extends ListActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.acoes));
         setListAdapter(adapter);
+    }
 
+    private void discar(){
+        Uri uri = Uri.parse("tel:71988273299");
+        Intent intent = new Intent(Intent.ACTION_CALL,uri);
+        dispararIntent(intent);
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            discar();
+        }
     }
 }
